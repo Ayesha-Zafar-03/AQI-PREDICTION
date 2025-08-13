@@ -96,5 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download AQI CSV
-        run: wget -O data/raw_aqi_data.csv "data/raw_aqi_data.csv"
+      - name: Ensure data folder exists
+        run: mkdir -p data
+      - name: Copy CSV (already in repo)
+        run: cp data/raw_aqi_data.csv /tmp/raw_aqi_data.csv
