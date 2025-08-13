@@ -1,24 +1,24 @@
-# Use an official Python runtime as a parent image
+# Use a lightweight Python base image
 FROM python:3.11-slim
 
-# Set working directory
+# Set working directory inside the container
 WORKDIR /app
 
-# Copy only requirements first to leverage caching
+# Copy only requirements first (better caching)
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Upgrade pip and install dependencies
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the app
+# Copy the entire project into the container
 COPY . .
 
-# Expose port for Streamlit
-EXPOSE 8501
+# Expose a port if your app uses a web server (optional)
+# EXPOSE 8501  # Uncomment if using Streamlit or Flask
 
-# Set environment variables for Streamlit
-ENV STREAMLIT_SERVER_ENABLECORS=false
-ENV STREAMLIT_SERVER_HEADLESS=true
+# Set environment variable to prevent Python buffering issues
+ENV PYTHONUNBUFFERED=1
 
-# Run the Streamlit app
-CMD ["streamlit", "run", "app/app.py"]
+# Default command to run your app
+CMD ["python", "main.py"]  # Replace main.py with your main script
