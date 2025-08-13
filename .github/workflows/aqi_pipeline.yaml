@@ -97,4 +97,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download AQI CSV
-        run: wget -O data/raw_aqi_data.csv "https://your_data_source_url/raw_aqi_data.csv"
+        run: wget -O data/raw_aqi_data.csv "data/raw_aqi_data.csv"
