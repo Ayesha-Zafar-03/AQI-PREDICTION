@@ -92,11 +92,25 @@ jobs:
           git diff-index --quiet HEAD || git commit -m "Retrain AQI models [skip ci]"
           git push
 
-  download-aqi-csv:
+  build-and-push-image:
     runs-on: ubuntu-latest
+    needs: train-models
     steps:
       - uses: actions/checkout@v4
-      - name: Ensure data folder exists
-        run: mkdir -p data
-      - name: Copy CSV (already in repo)
-        run: cp data/raw_aqi_data.csv /tmp/raw_aqi_data.csv
+
+      - name: Install Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install podman
+
+      - name: Log in to GHCR
+        run: |
+          echo "${{ secrets.GHCR_PAT }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build image with Podman
+        run: |
+          podman build -t ghcr.io/${{ github.repository_owner }}/aqi-predictor:latest .
+
+      - name: Push image to GHCR
+        run: |
+          podman push ghcr.io/${{ github.repository_owner }}/aqi-predictor:latest
