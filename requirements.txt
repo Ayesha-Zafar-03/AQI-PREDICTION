@@ -1,0 +1,8 @@
+streamlit==1.24.1
+requests
+pandas
+numpy
+scikit-learn
+joblib
+python-dateutil
+python-dotenv

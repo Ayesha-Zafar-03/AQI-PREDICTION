@@ -1,0 +1,10 @@
+# gitignore
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+data/
+models/
+*.pkl
+.DS_Store
