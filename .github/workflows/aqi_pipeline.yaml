@@ -1,13 +1,13 @@
 name: AQI Pipeline
 
 on:
-  push:              # Run CI on every push to main
+  push:
     branches:
       - main
   schedule:
-    - cron: '0 * * * *'    # hourly: update features
-    - cron: '0 2 * * *'    # daily at 02:00 UTC: retrain models
-  workflow_dispatch:       # allow manual trigger
+    - cron: '0 * * * *'    # Hourly: update features
+    - cron: '0 2 * * *'    # Daily at 02:00 UTC: retrain models
+  workflow_dispatch:       # Allow manual trigger
 
 jobs:
   ci-check:
@@ -21,9 +21,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Lint code
-        run: flake8 . || true   # or pylint if you use it
+        run: flake8 . || true
       - name: Run tests
-        run: pytest || true     # skip if no tests yet
+        run: pytest || true
 
   update-features:
     runs-on: ubuntu-latest
@@ -51,8 +51,9 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add data/*.csv
-          git commit -m "Update AQI features [skip ci]" || echo "No changes to commit"
+          git diff-index --quiet HEAD || git commit -m "Update AQI features [skip ci]"
           git push
+
   perform-eda:
     runs-on: ubuntu-latest
     needs: update-features
@@ -88,7 +89,12 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add models/aqi_model/*.pkl
-          git commit -m "Retrain AQI models [skip ci]" || echo "No changes to commit"
+          git diff-index --quiet HEAD || git commit -m "Retrain AQI models [skip ci]"
           git push
-      - name:  Download AQI CSV
-  run: wget -O data/raw_aqi_data.csv "https://your_data_source_url/raw_aqi_data.csv"
+
+  download-aqi-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download AQI CSV
+        run: wget -O data/raw_aqi_data.csv "https://your_data_source_url/raw_aqi_data.csv"
