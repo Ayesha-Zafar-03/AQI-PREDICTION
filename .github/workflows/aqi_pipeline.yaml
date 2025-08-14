@@ -86,13 +86,13 @@ jobs:
           python -m src.training_pipeline \
             --input data/processed_aqi_features.csv \
             --save-models models/aqi_model
-      - name: Commit updated models
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add models/aqi_model/*.pkl
-          git diff-index --quiet HEAD || git commit -m "Retrain AQI models [skip ci]"
-          git push
+      - name: Commit updated features
+  run: |
+    git config --global user.name "github-actions[bot]"
+    git config --global user.email "github-actions[bot]@users.noreply.github.com"
+    git add *.csv
+    git diff-index --quiet HEAD || git commit -m "Update AQI features [skip ci]" || echo "No changes to commit"
+    git push
 
   build-and-push-image:
     runs-on: ubuntu-latest
