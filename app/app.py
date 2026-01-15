@@ -220,10 +220,7 @@ last_pm25, fetch_time, data_source = fetch_current_pm25()
 
 if data_source == "API":
     st.success(f"✅ Live data fetched at {fetch_time.strftime('%H:%M:%S UTC')}")
-elif data_source == "CSV":
-    st.info("ℹ️ Using historical CSV data (API unavailable)")
-else:
-    st.warning("⚠️ Using default values (no data source available)")
+   
 
 # Load historical data
 RAW_FILE = "data/raw_aqi_data.csv"
