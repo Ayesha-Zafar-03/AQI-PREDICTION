@@ -465,9 +465,7 @@ st.markdown("---")
 st.markdown(
     """
     <div style='text-align:center; color:white; font-size:12px'>
-    <p>🔄 Data refreshes every hour | 📊 Predictions use dampened forecasting to prevent error amplification</p>
-    <p>💡 Accuracy: Day 1 (85-90%), Day 2 (75-80%), Day 3 (65-70%)</p>
-    <p>🔧 Improvements: Deterministic predictions, error dampening, range constraints</p>
+    <p>💡Powered By Ayesha Zafar </p>
     </div>
     """,
     unsafe_allow_html=True
