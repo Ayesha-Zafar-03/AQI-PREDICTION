@@ -266,8 +266,7 @@ model, model_loaded = load_model()
 
 if model_loaded:
     st.success(f"✅ Model loaded successfully")
-else:
-    st.info("ℹ️ No model found — using improved statistical forecasting")
+
 
 # ------------------ Fetch weather forecast ------------------
 weather_forecasts = fetch_weather_forecast()
