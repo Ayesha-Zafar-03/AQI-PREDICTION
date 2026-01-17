@@ -1,62 +1,81 @@
-# Project readme
-# AQI-PREDICTION — Multan
+# 🌫️ AQI-PREDICTION — Multan Air Quality Forecast
 
-> **Forecast Multan’s Air Quality (next 3 days) with ML + Streamlit (serverless)**
->
-> * Data: past 30 days via **Pandas** + future via **OpenWeather API**
-> * Models: **Random Forest**, **Linear Regression**, **Stacked Ensemble** (saved as `.pkl`)
-> * Explainability: **EDA** + **SHAP**
-> * Infra: **Podman** containers, images stored on **GHCR**, deployed on **Streamlit Cloud**
-> * CI/CD: **GitHub Actions** build & deploy pipeline
+> A Machine Learning-powered Air Quality Index (AQI) predictor for Multan, providing live updates, 3-day forecasts, and interactive visualizations using Streamlit.
 
 ---
 
-## ✨ Features
+## 🚀 Project Overview
 
-* 📊 **3‑day AQI forecast** for Multan with PM2.5 → AQI conversion
-* 🔎 **EDA dashboard**: trends, distributions, correlations
-* 🧠 **Explainability with SHAP**: global importance + per‑day contribution
-* 🧱 **Reproducible containers** via Podman; images hosted on GHCR
-* ☁️ **Serverless UI** on Streamlit Cloud
-* 🔁 **CI/CD** with GitHub Actions
+AQI-PREDICTION is a predictive system that forecasts air quality for Multan using **historical PM2.5 data**, weather forecasts, and a trained machine learning model. The project features:
+
+- Real-time AQI updates via OpenWeather API.
+- 3-day forecast for PM2.5 and AQI.
+- Interactive visualizations of trends and predictions.
+- Feature importance explanations using **SHAP**.
+- Containerized deployment with **Docker/Podman**.
 
 ---
 
-## 🗂️ Project structure (suggested)
+## 🗂️ Project Structure
 
 ```
+
 AQI-PREDICTION/
 ├─ app/
-│  └─ app.py                 # Streamlit app (UI + inference + SHAP)
+│  ├─ app.py                 # Main Streamlit application
+│  └─ daily_updater.py       # Script to update daily AQI data
 ├─ data/
-│  ├─ raw_aqi_data.csv       # 30-day PM2.5 history for Multan
-│  └─ processed/
-│     └─ features.csv        # Engineered features (lags, rolling stats, dates)
+│  └─ raw_aqi_data.csv       # Historical PM2.5 data
+├─ src/
+│  ├─ **init**.py
+│  └─ utils_stub.py          # Helper functions (e.g., PM2.5 → AQI conversion)
+├─ static/                   # Optional static assets (images, CSS)
 ├─ models/
 │  └─ aqi_model/
-│     └─ rf_model.pkl        # Trained model (RF or stacked)
-├─ src/
-│  ├─ feature_pipeline.py    # Build features.csv
-│  ├─ train.py               # Train RF/LR + stacked model; save .pkl
-│  └─ utils_stub.py          # pm25_to_aqi and helpers
-├─ .github/workflows/
-│  └─ ci-cd.yml              # Build, test, and deploy
-├─ Dockerfile (or Containerfile)
+│     └─ rf_model.pkl        # Trained Random Forest model
+├─ Dockerfile
+├─ run_podman.ps1
 ├─ requirements.txt
-├─ .env.example
 └─ README.md
-```
+
+````
 
 ---
 
-## 🧰 Requirements
+## 🧠 How It Works
 
-* Python 3.10+
-* Streamlit
-* pandas, numpy, scikit-learn, matplotlib, shap, python-dotenv
-* Podman (or Docker)
+1. **Data Collection**
+   - Historical PM2.5 values are stored in `data/raw_aqi_data.csv`.
+   - Current PM2.5 and 3-day weather forecast are fetched via OpenWeather API.
 
-Install Python deps:
+2. **Feature Engineering**
+   - Lag values (1–3 days) and rolling averages (7 & 14 days) are computed.
+   - Calendar features like day, month, and day-of-week are added.
+
+3. **Prediction**
+   - The Random Forest model predicts PM2.5 for the next 3 days.
+   - PM2.5 values are converted to AQI categories (Good, Moderate, Unhealthy, etc.).
+   - Fallback deterministic algorithm ensures robust predictions if the model fails.
+
+4. **Visualization**
+   - Streamlit dashboard displays:
+     - Current PM2.5 & AQI
+     - 3-day forecast cards with weather info
+     - PM2.5 & AQI trend chart
+     - SHAP feature importance and contribution plots
+
+---
+
+## 🛠️ Installation
+
+### Clone the repository
+
+```bash
+git clone https://github.com/Ayesha-Zafar-03/AQI-PREDICTION.git
+cd AQI-PREDICTION
+````
+
+### Install dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -64,239 +83,78 @@ pip install -r requirements.txt
 
 ---
 
-## 🔐 Environment variables
-
-Copy `.env.example` → `.env` and fill in values:
-
-```
-OPENWEATHER_API_KEY=your_api_key_here
-CITY=Multan
-LAT=30.1575
-LON=71.5249
-```
-
-> Keep your API key secret. Don’t commit `.env`.
-
----
-
-## 📥 Data acquisition
-
-**Historical (past 30 days):**
-
-* Load/clean PM2.5 & weather into `data/raw_aqi_data.csv` using Pandas
-
-**Future (next 3 days):**
-
-* Query OpenWeather endpoints for weather/pollution forecast
-
-**Feature engineering:**
-
-* Build `data/processed/features.csv` with:
-
-  * Lags: `pm2_5_lag1..3`
-  * Rolling means: `pm2_5_roll7`, `pm2_5_roll14`
-  * Calendar: `dayofweek`, `day`, `month`
-
-Example (pseudo):
-
-```bash
-python -m src.feature_pipeline --lat $LAT --lon $LON --days 30 \
-  --out data/processed/features.csv
-```
-
----
-
-## 🧪 EDA (what to look at)
-
-* **Distributions**: PM2.5/AQI histograms → typical ranges & outliers
-* **Trends**: 30‑day PM2.5 moving averages; weekend vs weekday effects
-* **Correlations**: heatmap across PM2.5, temp, humidity, wind → drivers
-* **Conditioned plots**: AQI vs wind speed/dir; high temp + low wind → spikes
-
-**Typical insights (Multan)**
-
-* PM2.5 is the dominant driver of AQI
-* Low wind & thermal inversions often precede higher AQI
-* Humidity shows mixed correlation; context dependent
-
-> Save plots to `reports/eda/` and show key ones in the Streamlit app.
-
----
-
-## 🤖 Modeling
-
-* **Algorithms**: RandomForestRegressor, LinearRegression, **Stacked**(RF+LR)
-* **Targets**: next‑day PM2.5 → converted to AQI via `pm25_to_aqi`
-* **Metrics**: MAE, RMSE, R² on held‑out recent days
-* **Artifacts**: `.pkl` models under `models/aqi_model/`
-
-Train & save:
-
-```bash
-python -m src.train \
-  --features data/processed/features.csv \
-  --out models/aqi_model/rf_model.pkl \
-  --stacked true
-```
-
-> Want **no joblib**? Use Python `pickle` to load `.pkl` or retrain on startup.
-
----
-
-## 🧩 Explainability with SHAP
-
-* **Global importance**: which features generally push predictions up/down
-* **Per‑prediction waterf all**: why today/tomorrow changed (lags vs weather)
-* **Expected patterns**:
-
-  * `pm2_5_lag1` and `pm2_5_roll7/14` → strongest for **T+1**
-  * Weather/forecast features gain weight for **T+2/T+3**
-
-
-## 📈 3‑day forecasting (how it works)
-
-1. Read last PM2.5 values from `data/raw_aqi_data.csv`
-2. Build features for T+1..T+3 (lags/rolling + date features + API forecasts)
-3. Predict PM2.5 per day → convert with `pm25_to_aqi`
-4. Render **cards** + **trend chart** in Streamlit
-
-> Categories: GOOD ≤50, MODERATE ≤100, USG ≤150, UNHEALTHY ≤200, VERY UNHEALTHY ≤300, HAZARDOUS >300.
-
----
-
-## 🖥️ Run locally
+## 🐍 Run the App
 
 ```bash
 streamlit run app/app.py
 ```
 
-* Ensure `data/raw_aqi_data.csv` exists
-* Ensure `models/aqi_model/rf_model.pkl` exists (or app will use a naive fallback)
-
-**Load model without joblib** (option):
-
-```python
-import pickle
-with open("models/aqi_model/rf_model.pkl", "rb") as f:
-    model = pickle.load(f)
-```
-
-**Or train on startup** (no serialization):
-
-```python
-from sklearn.ensemble import RandomForestRegressor
-# fit model using features.csv each run
-```
+* The app opens in your browser.
+* Current PM2.5 and AQI are displayed.
+* Interactive 3-day forecast and trend charts are shown.
+* SHAP explains feature contributions.
 
 ---
 
-## 📦 Containerization with Podman
+## 🐳 Containerized Deployment
 
-Build image:
+Build the Docker/Podman image:
 
 ```bash
-podman build -t aqi-dev:latest .
+podman build -t aqi-prediction .
 ```
 
-Run locally:
+Run:
 
 ```bash
-podman run --rm -p 8501:8501 \
-  --env-file .env \
-  -v "$PWD/data:/app/data" \
-  aqi-dev:latest
+podman run --rm -p 8501:8501 aqi-prediction
 ```
 
-### Push to GHCR
+---
 
-Login:
+## 🔑 Environment Variables
 
-```bash
-export CR_PAT=YOUR_GITHUB_PAT
-podman login ghcr.io -u <github-username> -p $CR_PAT
+Create a `.env` file with:
+
+```
+OPENWEATHER_API_KEY=your_api_key_here
+LAT=30.1575
+LON=71.5249
 ```
 
-Tag & push:
+* `OPENWEATHER_API_KEY` – API key for OpenWeather.
+* `LAT`, `LON` – Coordinates for Multan.
 
-```bash
-podman tag aqi-dev:latest ghcr.io/<github-username>/aqi-dev:latest
-podman push ghcr.io/<github-username>/aqi-dev:latest
+---
+
+## 📊 Screenshots
+
+![Dashboard Preview](./f3955c23-bcee-446b-ae11-188e478807e8.png)
+
+---
+
+## 💡 Contributing
+
+Contributions are welcome! You can:
+
+* Improve the ML model accuracy.
+* Add more visualization features.
+* Extend to other cities.
+
+---
+
+## 📄 License
+
+This project is open-source. See `LICENSE` for details.
+
+---
+
+## ❤️ Acknowledgements
+
+* OpenWeather API for real-time weather & air quality data.
+* SHAP library for model explainability.
+* Streamlit for building the interactive dashboard.
+
 ```
 
-> Use the image in Streamlit Cloud or other runners if desired.
-
 ---
-
-## ☁️ Deploy on Streamlit Cloud (serverless)
-
-1. Push repo to GitHub
-2. Create new Streamlit app → point to `app/app.py`
-3. Add secrets: `OPENWEATHER_API_KEY`, etc.
-4. Set Python version & `requirements.txt`
-
-> The app auto‑starts on commit; see CI/CD below for automation.
-
----
-
-## 🚀 CI/CD with GitHub Actions
-
-`.github/workflows/ci-cd.yml` (minimal example):
-
-```yaml
-name: CI/CD
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-jobs:
-  build-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - run: pip install -r requirements.txt
-      - run: python -m pytest || echo "no tests yet"
-  container:
-    needs: build-test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: |
-          echo ${{ secrets.GHCR_PAT }} | podman login ghcr.io -u ${{ github.actor }} --password-stdin
-          podman build -t ghcr.io/${{ github.repository_owner }}/aqi-dev:latest .
-          podman push ghcr.io/${{ github.repository_owner }}/aqi-dev:latest
-```
-
-> Optionally add a job to ping Streamlit Cloud or use Streamlit’s deploy integration.
-
----
-
-## 🐛 Troubleshooting
-
-* **ModuleNotFoundError: joblib** → either install `joblib` or switch to `pickle`
-* **Model missing** → ensure `models/aqi_model/rf_model.pkl` exists or enable train‑on‑startup
-* **OpenWeather quota** → cache API responses; add retry/backoff
-* **Timezones** → store timestamps in UTC; convert only for display
-
----
-
-## 📚 References
-
-* US EPA PM2.5 → AQI formula (used in `utils_stub.pm25_to_aqi`)
-* OpenWeather API docs for weather & air pollution endpoints
-
----
-
-## 📝 License
-
-Choose a license (e.g., MIT) and place it in `LICENSE`.
-
----
-
-## 🙌 Acknowledgements
-
-* Inspiration & feedback from the data science community
-* Open‑source maintainers of Streamlit, scikit‑learn, SHAP
