@@ -16,6 +16,16 @@ AQI-PREDICTION is a predictive system that forecasts air quality for Multan usin
 
 ---
 
+
+## 🔗 Live Demo
+
+Try the live deployed app here:
+
+👉 https://aqi‑prediction‑hmnwsdviqmzbdcsdvrbpnt.streamlit.app/
+
+---
+
+
 ## 🗂️ Project Structure
 
 ```
@@ -156,5 +166,3 @@ This project is open-source. See `LICENSE` for details.
 * Streamlit for building the interactive dashboard.
 
 ```
-
----
