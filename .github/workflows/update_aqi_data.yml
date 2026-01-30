@@ -22,7 +22,7 @@ jobs:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
           LAT: '30.1575'
           LON: '71.5249'
-        run: python daily_updater.py once
+        run: python AQI-PREDICTION/app/daily_updater.py once
       
       - name: Commit changes
         run: |
