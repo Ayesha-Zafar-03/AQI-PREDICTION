@@ -2,23 +2,30 @@ name: Daily AQI Data Update
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
+    - cron: '0 */6 * * *'
   workflow_dispatch:
+
 permissions:
   contents: write
+
+concurrency:
+  group: aqi-update
+  cancel-in-progress: false
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      
+
       - name: Install dependencies
         run: pip install requests pandas python-dotenv
-      
+
       - name: Update data
         env:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
@@ -26,11 +33,11 @@ jobs:
           LON: '71.5249'
         run: python app/daily_updater.py once
 
-      
       - name: Commit changes
         run: |
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
+          git pull --rebase origin main
           git add data/raw_aqi_data.csv
           git diff --staged --quiet || git commit -m "🤖 Update AQI data"
           git push
