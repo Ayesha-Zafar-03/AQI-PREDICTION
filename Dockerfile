@@ -1,12 +1,19 @@
-FROM python:3.12-slim
+# Use official Python image
+FROM python:3.10-slim
 
+# Set working directory
 WORKDIR /app
 
-# Install requirements if you have them
-# COPY requirements.txt .
-# RUN pip install --no-cache-dir -r requirements.txt
+# Copy requirements file
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install watchdog for file change detection
-RUN pip install watchdog
+# Copy your app code
+COPY app ./app
 
-CMD ["python", "dev_autoreload.py"]
+# Optional environment variables
+ENV LAT=30.1575
+ENV LON=71.5249
+
+# Default command to run your updater
+CMD ["python", "app/daily_updater.py", "once"]
