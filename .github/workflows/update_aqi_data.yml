@@ -2,15 +2,15 @@ name: Daily AQI Data Update
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Runs every 6 hours
-  workflow_dispatch:  # Allows manual triggering
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
   group: aqi-update
-  cancel-in-progress: false  # Prevents concurrent runs
+  cancel-in-progress: false
 
 jobs:
   update-data:
@@ -20,8 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetch full history to avoid conflicts
-          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -39,10 +38,9 @@ jobs:
         run: python app/daily_updater.py once
       
       - name: Commit and push changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main
-          git add data/raw_aqi_data.csv
-          git diff --staged --quiet || git commit -m "🤖 Update AQI data - $(date +'%Y-%m-%d %H:%M:%S')"
-          git push origin main
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "🤖 Update AQI data"
+          file_pattern: 'data/raw_aqi_data.csv'
+          commit_user_name: github-actions[bot]
+          commit_user_email: github-actions[bot]@users.noreply.github.com
