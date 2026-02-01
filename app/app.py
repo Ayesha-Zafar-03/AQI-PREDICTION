@@ -197,8 +197,8 @@ def fetch_weather_forecast():
 # ------------------ Load model ------------------
 @st.cache_resource
 def load_model():
-    """Load trained model with caching"""
-    MODEL_DIR = "models/aqi_model"
+    """Load trained models with caching"""
+    MODEL_DIR = "model/aqi_model"
     MODEL_FILE = "rf_model.pkl"
     path = os.path.join(MODEL_DIR, MODEL_FILE)
     

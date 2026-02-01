@@ -31,7 +31,7 @@ model = RandomForestRegressor(
 model.fit(X, y)
 
 # Save model
-os.makedirs("models/aqi_model", exist_ok=True)
-joblib.dump(model, "models/aqi_model/rf_model.pkl")
+os.makedirs("model/aqi_model", exist_ok=True)
+joblib.dump(model, "model/aqi_model/rf_model.pkl")
 
 print("✅ rf_model.pkl saved in models/aqi_model/")
