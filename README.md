@@ -1,167 +1,136 @@
-# 🌫️ AQI-PREDICTION — Multan Air Quality Forecast
+# AQI-PREDICTION-MULTAN
 
-> A Machine Learning-powered Air Quality Index (AQI) predictor for Multan, providing live updates, 3-day forecasts, and interactive visualizations using Streamlit.
+![Python](https://img.shields.io/badge/python-3.10+-blue)
+![Docker](https://img.shields.io/badge/docker-GHCR-brightgreen)
+![CI/CD](https://github.com/Ayesha-Zafar-03/AQI-PREDICTION/actions/workflows/update_aqi_data.yml/badge.svg)
 
----
-
-## 🚀 Project Overview
-
-AQI-PREDICTION is a predictive system that forecasts air quality for Multan using **historical PM2.5 data**, weather forecasts, and a trained machine learning model. The project features:
-
-- Real-time AQI updates via OpenWeather API.
-- 3-day forecast for PM2.5 and AQI.
-- Interactive visualizations of trends and predictions.
-- Feature importance explanations using **SHAP**.
-- Containerized deployment with **Docker/Podman**.
+Air Quality Index (AQI) prediction for Multan using **Machine Learning**, **Docker**, and **CI/CD**.  
+Fetches live pollutant data, predicts future AQI, and updates CSV data automatically.
 
 ---
 
+## 📌 Project Overview
 
-## 🔗 Live Demo
-
-Try the live deployed app here:
-
-👉 https://aqi‑prediction‑hmnwsdviqmzbdcsdvrbpnt.streamlit.app/
+- Predicts **AQI** using historical pollutants:
+  - PM2.5, PM10, NO2, SO2, O3, CO
+- Trained ML model stored at `models/aqi-model/model.pkl`
+- Docker image built & pushed to **GitHub Container Registry (GHCR)**
+- CI/CD workflow updates `data/raw-aqi-data.csv` every 6 hours
+- Streamlit app for **interactive visualization** & predictions
 
 ---
 
-
-## 🗂️ Project Structure
+## 🗂 Repository Structure
 
 ```
 
 AQI-PREDICTION/
 ├─ app/
-│  ├─ app.py                 # Main Streamlit application
-│  └─ daily_updater.py       # Script to update daily AQI data
+│  ├─ app.py                # Streamlit interface + inference
+│  └─ daily_updater.py      # Fetches latest AQI data
 ├─ data/
-│  └─ raw_aqi_data.csv       # Historical PM2.5 data
+│  └─ raw-aqi-data.csv      # Historical and updated AQI data
+├─ models/
+│  └─ aqi-model/
+│     └─ model.pkl          # Trained ML model
 ├─ src/
 │  ├─ **init**.py
-│  └─ utils_stub.py          # Helper functions (e.g., PM2.5 → AQI conversion)
-├─ static/                   # Optional static assets (images, CSS)
-├─ models/
-│  └─ aqi_model/
-│     └─ rf_model.pkl        # Trained Random Forest model
-├─ Dockerfile
-├─ run_podman.ps1
+│  └─ utils_stub.py         # Utility functions
+├─ Dockerfile               # Build Docker image
 ├─ requirements.txt
+├─ train_model.py           # Train and save ML model
+├─ .github/workflows/
+│  └─ update_aqi_data.yml  # CI/CD workflow
+├─ .dockerignore
+├─ .gitignore
 └─ README.md
 
 ````
 
 ---
 
-## 🧠 How It Works
+## 🐳 Docker & GHCR
 
-1. **Data Collection**
-   - Historical PM2.5 values are stored in `data/raw_aqi_data.csv`.
-   - Current PM2.5 and 3-day weather forecast are fetched via OpenWeather API.
+Docker image stored in **GHCR**.
 
-2. **Feature Engineering**
-   - Lag values (1–3 days) and rolling averages (7 & 14 days) are computed.
-   - Calendar features like day, month, and day-of-week are added.
+### Build Docker image locally:
 
-3. **Prediction**
-   - The Random Forest model predicts PM2.5 for the next 3 days.
-   - PM2.5 values are converted to AQI categories (Good, Moderate, Unhealthy, etc.).
-   - Fallback deterministic algorithm ensures robust predictions if the model fails.
+```bash
+docker build -t ghcr.io/<your-username>/aqi-updater:latest .
+````
 
-4. **Visualization**
-   - Streamlit dashboard displays:
-     - Current PM2.5 & AQI
-     - 3-day forecast cards with weather info
-     - PM2.5 & AQI trend chart
-     - SHAP feature importance and contribution plots
+### Run Docker container:
+
+```bash
+docker run -p 8501:8501 ghcr.io/<your-username>/aqi-updater:latest
+```
+
+Streamlit app will be available at `http://localhost:8501`.
 
 ---
 
-## 🛠️ Installation
+## ⚙️ CI/CD Pipeline
 
-### Clone the repository
+* Workflow: `.github/workflows/update_aqi_data.yml`
+* Runs every **6 hours** (`cron: '0 */6 * * *'`)
+* Fetches latest pollutant data via API
+* Updates `data/raw-aqi-data.csv` automatically
+* Ensures ML predictions always use **up-to-date data**
+
+---
+
+## 🧠 Model Training
+
+Train the ML model:
+
+```bash
+python train_model.py
+```
+
+* Saves trained model at `models/aqi-model/model.pkl`
+* Model is used by Streamlit app for predictions
+
+---
+
+## 🏃‍♂️ Run Locally
+
+1. Clone repository:
 
 ```bash
 git clone https://github.com/Ayesha-Zafar-03/AQI-PREDICTION.git
 cd AQI-PREDICTION
-````
+```
 
-### Install dependencies
+2. Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
-## 🐍 Run the App
+3. Run Streamlit app:
 
 ```bash
 streamlit run app/app.py
 ```
 
-* The app opens in your browser.
-* Current PM2.5 and AQI are displayed.
-* Interactive 3-day forecast and trend charts are shown.
-* SHAP explains feature contributions.
+---
+
+## 📊 Data & Features
+
+* Pollutants: **PM2.5, PM10, NO2, SO2, O3, CO**
+* Timestamped data every **6 hours**
+* Features include lag values, rolling averages, and weather parameters
+* Target: **AQI**
 
 ---
 
-## 🐳 Containerized Deployment
+## 🔮 Future Improvements
 
-Build the Docker/Podman image:
-
-```bash
-podman build -t aqi-prediction .
-```
-
-Run:
-
-```bash
-podman run --rm -p 8501:8501 aqi-prediction
-```
+* Multi-city AQI prediction
+* Real-time backend API deployment
+* Additional pollutant and meteorological features
+* Model explainability (SHAP, feature importance)
 
 ---
 
-## 🔑 Environment Variables
-
-Create a `.env` file with:
-
-```
-OPENWEATHER_API_KEY=your_api_key_here
-LAT=30.1575
-LON=71.5249
-```
-
-* `OPENWEATHER_API_KEY` – API key for OpenWeather.
-* `LAT`, `LON` – Coordinates for Multan.
-
----
-
-## 📊 Screenshots
-
-![Dashboard Preview](./f3955c23-bcee-446b-ae11-188e478807e8.png)
-
----
-
-## 💡 Contributing
-
-Contributions are welcome! You can:
-
-* Improve the ML model accuracy.
-* Add more visualization features.
-* Extend to other cities.
-
----
-
-## 📄 License
-
-This project is open-source. See `LICENSE` for details.
-
----
-
-## ❤️ Acknowledgements
-
-* OpenWeather API for real-time weather & air quality data.
-* SHAP library for model explainability.
-* Streamlit for building the interactive dashboard.
 
